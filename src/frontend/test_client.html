@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EU Law Chunks Client</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f8;
+    margin: 0;
+    padding: 40px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+    margin-top: 0;
+}
+
+.row {
+    margin-bottom: 15px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 16px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #1976d2;
+    color: white;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #125ea8;
+}
+
+#result {
+    margin-top: 20px;
+    padding: 15px;
+    min-height: 250px;
+    background: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: auto;
+    white-space: pre-wrap;
+}
+
+.status-ok {
+    color: green;
+    font-weight: bold;
+}
+
+.status-error {
+    color: red;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>EU Law Chunks FastAPI Client</h1>
+
+    <div class="row">
+        <button onclick="checkHealth()">Check Health</button>
+        <button onclick="getDocuments()">Get Documents</button>
+        <button onclick="getChunks()">Get Chunks</button>
+        <button onclick="clearResult()">Clear</button>
+    </div>
+
+    <div class="row">
+        <label for="documentId">Choose document:</label>
+        <select id="documentId">
+            <option value="32016R0679">GDPR</option>
+            <option value="32022R2554">DORA</option>
+            <option value="32015L2366">PSD2</option>
+            <option value="32014L0065">MiFID II</option>
+            <option value="32024R1689">AI Act</option>
+        </select>
+    </div>
+
+    <div class="row">
+        <label for="limit">Limit:</label>
+        <input
+            id="limit"
+            type="number"
+            value="5"
+            min="1"
+            max="100"
+        />
+    </div>
+
+    <div class="row">
+        <button onclick="getChunksByDocument()">
+            Get Chunks By Document
+        </button>
+    </div>
+
+    <div id="result">
+Ready...
+    </div>
+
+</div>
+
+<script>
+
+const API_BASE_URL = "http://localhost:8000";
+
+function show(data) {
+    document.getElementById("result").textContent =
+        typeof data === "string"
+            ? data
+            : JSON.stringify(data, null, 2);
+}
+
+function clearResult() {
+    document.getElementById("result").textContent = "";
+}
+
+function getLimit() {
+    const limit = document.getElementById("limit").value;
+
+    if (!limit || limit < 1) {
+        return 5;
+    }
+
+    return limit;
+}
+
+async function checkHealth() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/health`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        show(data);
+
+    } catch (error) {
+        show(`Health check failed:\n${error.message}`);
+    }
+}
+
+async function getDocuments() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/documents`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        show(data);
+
+    } catch (error) {
+        show(`Documents request failed:\n${error.message}`);
+    }
+}
+
+async function getChunks() {
+    try {
+        const limit = getLimit();
+
+        const response = await fetch(
+            `${API_BASE_URL}/eu_law_chunks?limit=${limit}`
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        show(data);
+
+    } catch (error) {
+        show(`Chunks request failed:\n${error.message}`);
+    }
+}
+
+async function getChunksByDocument() {
+    try {
+        const documentId = document.getElementById("documentId").value;
+        const limit = getLimit();
+
+        const response = await fetch(
+            `${API_BASE_URL}/eu_law_chunks/${documentId}?limit=${limit}`
+        );
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        show(data);
+
+    } catch (error) {
+        show(`Document chunks request failed:\n${error.message}`);
+    }
+}
+
+</script>
+
+</body>
+</html>
