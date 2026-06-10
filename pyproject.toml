@@ -8,7 +8,13 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "bs4>=0.0.2",
+    "databricks-connect>=18.2.1",
+    "databricks-sdk>=0.114.0",
     "fastapi>=0.136.3",
+    "langchain-text-splitters>=1.1.2",
+    "pypdf>=6.12.2",
+    "python-dotenv>=1.2.2",
     "requests>=2.34.2",
     "uvicorn>=0.48.0",
 ]
